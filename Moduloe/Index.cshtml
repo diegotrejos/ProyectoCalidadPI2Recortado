@@ -1,0 +1,100 @@
+@model IEnumerable<Proyecto.Models.Modulo>
+
+@{
+   
+    ViewBag.Title = "Módulos";
+}
+<head>
+    <link rel="stylesheet" type="text/css" href="~/Content/style.css" / >
+
+</head>
+<body onload="Desabilitar();">
+    <h2>Lista Módulos </h2>
+    @**@
+
+    @*Genera una dropdown list con todos los proyectos*@
+
+    @*DROPDOWN LIST QUE LLAMA A METODO POST INDEX EN CONTROLLER*@
+    @using (Html.BeginForm())
+    {
+        <fieldset>
+            <div class="display-label">
+                Buscar por Proyecto
+            </div>
+            <div class="editor-field">
+
+                <form action="/Moduloe/Index" method="post">
+                    @if ((string)System.Web.HttpContext.Current.Session["rol"] == "Cliente")
+                    {
+                        @Html.DropDownList("filtro", ((Proyecto.Controllers.ModuloeController)this.ViewContext.Controller).getProyectos("Cliente", (string)System.Web.HttpContext.Current.Session["cedula"]), "Seleccione un Proyecto", new { @class = "form-control", @onchange = "this.form.submit()" })
+                    }
+                    else if ((string)System.Web.HttpContext.Current.Session["rol"] == "Jefe")
+                    {
+                        @Html.DropDownList("filtro", ((Proyecto.Controllers.ModuloeController)this.ViewContext.Controller).getProyectos("Jefe", (string)System.Web.HttpContext.Current.Session["cedula"]), "Seleccione un Proyecto", new { @class = "form-control" , @onchange = "this.form.submit()" })
+                    }
+                    else
+                    {
+                        @Html.DropDownList("filtro", ((Proyecto.Controllers.ModuloeController)this.ViewContext.Controller).getProyectos("Empleado", (string)System.Web.HttpContext.Current.Session["cedula"]), "Seleccione un Proyecto", new { @class = "form-control", @onchange = "this.form.submit()" })
+                    }
+
+
+                    @*<input type="submit" value="Buscar" class="btn btn-default" />*@
+                    <noscript><input type="submit" value="Submit"></noscript>
+                </form>
+                </div>
+        </fieldset>
+    }
+
+    <p class=" boton float-right">
+        <button onclick="location.href = 'Moduloe/Create'" class="btn Desarrollador Cliente btn-lg glyphicon glyphicon-plus float-right " style="background: #5B3924; color:white"></button>
+    </p>
+
+
+    <br />
+    <br />
+
+    @*Tabla de Modulos*@
+
+    <table class="table table-striped">
+        <tr>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NombreProy)
+            </th>
+        </tr>
+
+
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>
+                    @Html.ActionLink(item.Nombre, "Details","Moduloe", new { id = item.Id, nombreProy = item.NombreProy }, null)
+                </td>
+                <td>
+                    @Html.ActionLink(item.NombreProy, "Details", "Moduloe", new { id = item.Id, nombreProy = item.NombreProy }, null)
+                </td>
+                <td>
+                    <!--ActionLink(como quiero que se llame, A donde va el link, controllador,dato que quiero pasar) -->
+                    @Html.ActionLink(" ", "Edit", "Moduloe", new { id = item.Id, nombreProy = item.NombreProy }, new { @class = "btn  Desarrollador Cliente btn-info glyphicon glyphicon-wrench float-right " })
+
+                    @Html.ActionLink(" ", "Delete", "Moduloe", new { id = item.Id, nombreProy = item.NombreProy }, new { @class = "btn Desarrollador Cliente btn-danger glyphicon glyphicon-trash float-right " })
+                    @*Va ventana donde se muestran todos los requerimientos de este modulo*@
+                    @Html.ActionLink("Requerimientos", "consulReq", "Requerimiento", new { modID = item.Id, nombreModulo=item.Nombre ,nombreProy = item.NombreProy }, new { @class = "btn float-right cafe"  })
+                </td>
+            </tr>
+        }
+    </table>
+    <script>
+        function Desabilitar() {
+            var rol = '@ViewBag.user';
+            var lista = document.getElementsByClassName(rol);
+            for (var i = 0; i < lista.length; ++i) {
+                lista[i].hidden = true;
+            }
+        }
+    </script>
+</body>

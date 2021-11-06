@@ -1,0 +1,63 @@
+@model Proyecto.Models.Modulo
+
+@{
+    ViewBag.Title = "Eliminar Módulo";
+}
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+
+
+
+    <div class="container-fluid text-center">
+
+
+        <h2>Eliminar Módulo</h2>
+        <h3 style="color:#FF0000" ;> ¿Está seguro que desea eliminar este Módulo?</h3>
+
+        <table class="d-flex justify-content-center">
+            <tbody>
+                <tr style="line-height:50px">
+                    <th>
+                        Nombre
+                    </th>
+                    <td>
+                        @Html.DisplayFor(model => model.Nombre)
+                    </td>
+                </tr>
+                <tr style="line-height:50px">
+                    <th>
+                        Nombre Proyecto
+                    </th>
+                    <td>
+                        @Html.DisplayFor(model => model.NombreProy)
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+
+
+
+
+
+    </div>
+
+
+
+
+    <div class="botones text-center">
+        <input type="submit" value="Eliminar" class="btn btn-danger" />
+        @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default btn-default" })
+    </div>
+
+    <div class="botones text-right">
+        @Html.ActionLink("Regresar", "Index", null, new { @class = "btn btn-default " })
+    </div>
+}
+
+
+
