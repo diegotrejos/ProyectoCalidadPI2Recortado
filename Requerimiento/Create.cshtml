@@ -1,0 +1,266 @@
+@model Proyecto.Models.Requerimiento
+
+@{
+    /**/
+
+    ViewBag.Title = "Create";
+}
+
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="container-fluid text-center">
+        <h2>Agregar Requerimiento</h2>
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <table class="d-flex justify-content-center">
+
+            <tbody>
+                <tr>
+                    <th>
+                        Proyecto  <a style="color:red"> *</a>
+                    </th>
+                    <td required="true">
+
+
+                        @if ((string)System.Web.HttpContext.Current.Session["rol"] == "Cliente")
+                        {
+                            @Html.DropDownList("nombreProyecto", ((Proyecto.Controllers.RequerimientoController)this.ViewContext.Controller).getProyectos("Cliente", (string)System.Web.HttpContext.Current.Session["cedula"]), "Seleccione un Proyecto", new { name = "nombreProyecto",@class = "form-control"  })
+                        }
+                        else if ((string)System.Web.HttpContext.Current.Session["rol"] == "Jefe")
+                        {
+                            @Html.DropDownList("nombreProyecto", ((Proyecto.Controllers.RequerimientoController)this.ViewContext.Controller).getProyectos("Jefe", (string)System.Web.HttpContext.Current.Session["cedula"]), "Seleccione un Proyecto", new { name = "nombreProyecto",@class = "form-control"  })
+                        }
+                        else
+                        {
+                            @Html.DropDownList("nombreProyecto", ((Proyecto.Controllers.RequerimientoController)this.ViewContext.Controller).getProyectos("Empleado", (string)System.Web.HttpContext.Current.Session["cedula"]), "Seleccione un Proyecto", new { name = "nombreProyecto",@class = "form-control"  })
+                        }
+                        @Html.ValidationMessageFor(model => model.nombreProyecto_FK, "", new { @class = "text-danger" })
+                    </td>
+                </tr>
+
+
+
+                <tr>
+                    <th>
+                        Modulo  <a style="color:red"> *</a>
+                    </th>
+                    <td required="true">
+
+                        <select id="nombreModulo" name="nombreModulo" required="required" class = "form-control" >
+                            Seleccione modulo
+                            <option>Seleccione un modulo
+                        </select>
+                    </td>
+                </tr>
+
+
+
+                <tr>
+                    <th>
+                        Nombre de Requerimiento  <a style="color:red"> *</a>
+                    </th>
+                    <td required="true">
+                        @Html.EditorFor(model => model.nombre, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.nombre, "", new { @class = "text-danger" })
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <th>
+                        Duracion estimada
+                    </th>
+                    <td>
+                        @Html.EditorFor(model => model.duracionEstimada, new { htmlAttributes = new { @class = "form-control" } })
+
+                    </td>
+                </tr>
+
+
+                <tr>
+                    <th>
+                        Duracion Real
+                    </th>
+                    <td>
+                        @Html.EditorFor(model => model.duracionReal, new { htmlAttributes = new { @class = "form-control" } })
+
+                    </td>
+                </tr>
+
+
+
+                <tr>
+                    <th>
+                        Estado
+                    </th>
+                    <td>
+                        @if (TempData["Estado"] != null)
+                        {
+                            @Html.DropDownList("estado", new SelectList(TempData["Estado"] as List<string>))
+                        }
+                    </td>
+                </tr>
+
+
+
+                <tr>
+                    <th>
+                        Responsable
+                    </th>
+                    <td required="true">
+                        <select id="miembro" name="miembro">
+                            Miembro responsable
+                            <option>Seleccione un miembro
+                        </select>
+                    </td>
+
+                </tr>
+
+
+                <tr>
+                    <th>
+                        Complejidad
+                    </th>
+                    <td required="true">
+                        @if (TempData["Complejidad"] != null)
+                        {
+                            @Html.DropDownList("complejidad", new SelectList(TempData["Complejidad"] as List<string>))
+                        }
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Crear" class="btn btn-success" />
+                @Html.ActionLink("Cancelar", "Index", null, new { @class = "btn btn-default btn-large" })
+            </div>
+
+
+
+
+
+        </div>
+
+
+    </div>
+
+    <div class="botones text-right">
+        @Html.ActionLink("Regresar", "Index", null, new { @class = "btn btn-default " })
+    </div>
+
+}
+
+
+
+
+
+
+<div>
+
+
+
+
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+
+
+@*Script para pasarle por parametro el resultado del primer dropdown al segundo de proyecto a modulo*@
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#nombreModulo").prop("disabled", true);//se desactiva el primer drowpdown mientras se trabaja esto
+
+        $("#nombreProyecto").change(function () {
+
+            if ($("#nombreProyecto").val() != "Seleccione un Proyecto") {//si esta el valor default del primer dropdown no se hace nada
+
+                var ModulosProyecto = {};
+
+                ModulosProyecto.url = "/Requerimiento/getModulos";//se llenara segunda dropdownlist con lo q devuelva el metodo getmodulos
+                ModulosProyecto.type = "POST";
+                ModulosProyecto.data = JSON.stringify({
+                    nombreProyecto: $("#nombreProyecto").val()//parametro q se pasa
+                });
+                ModulosProyecto.datatype = "json";
+                ModulosProyecto.contentType = "application/json";
+                ModulosProyecto.success = function (data) {//datos q retorna getmodulo
+
+                    $("#nombreModulo").empty();
+                    $("#nombreModulo").append("<option>" + "Seleccione un modulo" + "</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $("#nombreModulo").append("<option>" + data[i].Text + "</option>");//retorna objetos JSON que hay q abrir con .text
+                    }
+                    $("#nombreModulo").prop("disabled", false);
+                };
+
+                ModulosProyecto.error = function () {
+                    alert("Error obteniendo los modulos");
+                };
+
+                $.ajax(ModulosProyecto);
+            } else {
+                $("#nombreModulo").empty();
+                $("#nombreModulo").prop("disabled", true);
+            }
+        });
+    });
+</script>
+
+
+
+
+@*Script para pasarle por parametro el resultado del primer dropdown al segundo proyecto a equipo*@
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#miembro").prop("disabled", true);//se desactiva el primer drowpdown mientras se trabaja esto
+
+        $("#nombreProyecto").change(function () {
+
+            if ($("#nombreProyecto").val() != "Seleccione un Proyecto") {//si esta el valor default del primer dropdown no se hace nada
+
+                var ModulosProyecto = {};
+
+                ModulosProyecto.url = "/Requerimiento/getEmpleadosProyecto";//se llenara segunda dropdownlist con lo q devuelva el metodo getmodulos
+                ModulosProyecto.type = "POST";
+                ModulosProyecto.data = JSON.stringify({
+                    nombreProyecto: $("#nombreProyecto").val()//parametro q se pasa
+                });
+                ModulosProyecto.datatype = "json";
+                ModulosProyecto.contentType = "application/json";
+                ModulosProyecto.success = function (data) {//datos q retorna getmodulo
+
+                    $("#miembro").empty();
+                    $("#nombreModulo").append("<option>" + "Seleccione un modulo" + "</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $("#miembro").append("<option>" + data[i].Text + "</option>");//retorna objetos JSON que hay q abrir con .text
+                    }
+                    $("#miembro").prop("disabled", false);
+                };
+
+                ModulosProyecto.error = function () {
+                    alert("Error obteniendo los modulos");
+                };
+
+                $.ajax(ModulosProyecto);
+            } else {
+                $("#miembro").empty();
+                $("#miembro").prop("disabled", true);
+            }
+        });
+    });
+</script>
+

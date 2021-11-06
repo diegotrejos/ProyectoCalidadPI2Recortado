@@ -1,0 +1,174 @@
+﻿@model IEnumerable<Proyecto.Models.Requerimiento>
+
+@{
+    ViewBag.Title = "Requerimientos";
+}
+
+<h2>Lista Requerimientos</h2>
+
+
+<head>
+    <link rel="stylesheet" type="text/css" href="~/Content/style.css" / >
+
+</head>
+
+<body onload="Desabilitar();">
+
+
+    <fieldset>
+        <div class="display-label">
+            Buscar por Proyecto
+        </div>
+        <div class="editor-field">
+            @**@
+            <form action="/Requerimiento/Index" method="post">
+                @if ((string)System.Web.HttpContext.Current.Session["rol"] == "Cliente")
+                {
+                    @Html.DropDownList("nombreProyecto", ((Proyecto.Controllers.RequerimientoController)this.ViewContext.Controller).getProyectos("Cliente", (string)System.Web.HttpContext.Current.Session["cedula"]), "Seleccione un Proyecto", new { name = "nombreProyecto", @class= "form-control" })
+                }
+                else if ((string)System.Web.HttpContext.Current.Session["rol"] == "Jefe")
+                {
+                    @Html.DropDownList("nombreProyecto", ((Proyecto.Controllers.RequerimientoController)this.ViewContext.Controller).getProyectos("Jefe", (string)System.Web.HttpContext.Current.Session["cedula"]), "Seleccione un Proyecto", new { name = "nombreProyecto" , @class= "form-control"})
+                }
+                else
+                {
+                    @Html.DropDownList("nombreProyecto", ((Proyecto.Controllers.RequerimientoController)this.ViewContext.Controller).getProyectos("Empleado", (string)System.Web.HttpContext.Current.Session["cedula"]), "Seleccione un Proyecto", new { name = "nombreProyecto" , @class= "form-control" })
+                }
+
+
+
+                <div class="display-label">
+                    Buscar por Modulos
+                </div>
+
+                <div>@*Activa el script que actualiza la info del segundo dropdown  y luego de esta eleccion se actualiza la tabla sin necesidad de un boton*@
+                    <select id="nombreModulo" name="nombreModulo" class="form-control" onchange='this.form.submit()'>
+                        <option>Seleccione un módulo</option>
+                    </select>
+                </div>
+
+                <noscript><input type="submit" value="Submit"></noscript>
+
+        
+            </form>
+        </div>
+
+    </fieldset>
+
+
+
+
+
+
+    <p class=" boton float-right">
+        <button onclick="location.href = 'Requerimiento/Create'" class="btn  Desarrollador Cliente btn-lg glyphicon glyphicon-plus float-right cafe"></button>
+    </p>
+
+    <table class="table table-striped">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.complejidad)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.estado)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.cedulaResponsable_FK)
+            </th>
+
+            <th></th>
+        </tr>
+        
+  @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.ActionLink(item.nombre, "Details", new {nombreProy = item.nombreProyecto_FK, modID = item.idModulo_FK, nombreReq = item.nombre }, null)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.complejidad)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.estado)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => ((Proyecto.Controllers.RequerimientoController)this.ViewContext.Controller).getNombre(item.cedulaResponsable_FK).nombreED)
+                </td>
+                
+                <td>
+                    
+                    @Html.ActionLink(" ", "Edit", "Requerimiento", new { nombreProyecto = item.nombreProyecto_FK, modID = item.idModulo_FK, nombreReq = item.nombre }, new { @class = "btn  Cliente btn-info glyphicon glyphicon-wrench float-right " })
+
+                    @if (item.estado == "Finalizado" || item.estado == "Suspendido")
+                    {
+                        @Html.ActionLink(" ", "Delete", "Requerimiento", new { nombreProyecto = item.nombreProyecto_FK, modID = item.idModulo_FK, nombreReq = item.nombre }, new { @class = "btn Desarrollador Cliente btn-danger glyphicon glyphicon-trash float-right " })
+
+                    }
+                    
+                </td>
+            </tr>
+        }
+
+    </table>
+
+    <script>
+        function Desabilitar() {
+            var rol = '@ViewBag.user';
+            var lista = document.getElementsByClassName(rol);
+            for (var i = 0; i < lista.length; ++i) {
+                lista[i].hidden = true;
+            }
+        }
+    </script>
+</body>
+
+
+
+
+@*Script para pasarle por parametro el resultado del primer dropdown al segundo*@
+<script src="~/Scripts/jquery-1.10.2.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#nombreModulo").prop("disabled", true);//se desactiva el primer drowpdown mientras se trabaja esto
+
+        $("#nombreProyecto").change(function () {
+
+            if ($("#nombreProyecto").val() != "Seleccione un Proyecto") {//si esta el valor default del primer dropdown no se hace nada
+
+                var ModulosProyecto = {};
+
+                ModulosProyecto.url = "/Requerimiento/getModulos";//se llenara segunda dropdownlist con lo q devuelva el metodo getmodulos
+                ModulosProyecto.type = "POST";
+                ModulosProyecto.data = JSON.stringify({
+                    nombreProyecto: $("#nombreProyecto").val()//parametro q se pasa
+                });
+                ModulosProyecto.datatype = "json";
+                ModulosProyecto.contentType = "application/json";
+                ModulosProyecto.success = function (data) {//datos q retorna getmodulo
+
+                    $("#nombreModulo").empty();
+                    $("#nombreModulo").append("<option>" + "Seleccione un módulo" + "</option>");
+                    for (var i = 0; i < data.length; i++) {
+                        $("#nombreModulo").append("<option>" + data[i].Text + "</option>");//retorna objetos JSON que hay q abrir con .text
+                    }
+                    $("#nombreModulo").prop("disabled", false);
+                };
+
+                ModulosProyecto.error = function () {
+                    alert("Error obteniendo los modulos");
+                };
+
+                $.ajax(ModulosProyecto);
+            } else {
+                $("#nombreModulo").empty();
+                $("#nombreModulo").prop("disabled", true);
+            }
+        });
+    });
+</script>
+
+
+

@@ -1,0 +1,81 @@
+@model Proyecto.Models.Requerimiento
+
+@{
+    ViewBag.Title = "Details";
+}
+
+
+
+<div class="container-fluid text-center">
+    <h2>Detalles del Requerimiento</h2>
+
+    <table class="d-flex justify-content-center">
+        <tbody>
+            <tr>
+                <th>
+                    Complejidad
+                </th>
+
+                <td>
+                    @Html.DisplayFor(model => model.complejidad)
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    Duracion Estimada
+                </th>
+
+                <td>
+                    @Html.DisplayFor(model => model.duracionEstimada)
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    Duracion Real
+                </th>
+
+                <td>
+                    @Html.DisplayFor(model => model.duracionReal)
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    Estado
+                </th>
+
+                <td>
+                    @Html.DisplayFor(model => model.estado)
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    Empleado Responsable
+                </th>
+
+                <td>
+                    @Html.DisplayFor(model => model.EmpleadoDesarrollador.nombreED)
+                </td>
+            </tr>
+
+            <tr>
+                <th>
+                    Nombre
+                </th>
+
+                <td>
+                    @Html.DisplayFor(model => model.Modulo.Nombre)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<p class=" boton text-center">
+    <a href="~/Requerimiento/Index" class="btn btn-default ">
+        <span></span> Regresar
+    </a>
+</p>
+
